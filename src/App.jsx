@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import COLORS from './design-system'
+import { askAgilePulse } from './api/claudeApi'
 
 const CHIPS = [
   '🏃 Sprint status right now',
@@ -110,19 +111,24 @@ export default function App() {
 
   function handleChipClick(label) {
     setQuestion(label)
+    handleSubmit(label)
   }
 
-  async function handleSubmit() {
-    const q = question.trim()
+  async function handleSubmit(overrideQuestion) {
+    const q = (overrideQuestion ?? question).trim()
     if (!q || loading) return
     setLoading(true)
     setAnswer('')
-    // Placeholder — Claude API integration comes next
-    await new Promise(r => setTimeout(r, 800))
-    const a = `[Live Jira data integration coming soon]\n\nYou asked: "${q}"\n\nThis will query your team's Jira board in real time and return a synthesized answer using Claude.`
-    setHistory(prev => [...prev, { q, a }])
     setQuestion('')
-    setLoading(false)
+    try {
+      const a = await askAgilePulse(q)
+      setHistory(prev => [...prev, { q, a }])
+    } catch (err) {
+      const a = `⚠️ Unable to reach Jira right now. Check your connection and try again.\n\n${err.message}`
+      setHistory(prev => [...prev, { q, a }])
+    } finally {
+      setLoading(false)
+    }
   }
 
   function handleKeyDown(e) {
@@ -132,7 +138,7 @@ export default function App() {
     }
   }
 
-  const showHero = history.length === 0
+  const showHero = history.length === 0 && !loading
 
   return (
     <div style={{
