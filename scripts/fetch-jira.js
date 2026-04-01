@@ -13,6 +13,7 @@ async function jiraSearch(jql, fields, maxResults = 100) {
     },
     body: JSON.stringify({ jql, fields: fields.split(','), maxResults })
   });
+  console.log(`POST /search/jql [${jql.substring(0, 60)}...] → ${res.status}`);
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`Jira API error ${res.status}: ${body}`);
@@ -21,6 +22,21 @@ async function jiraSearch(jql, fields, maxResults = 100) {
 }
 
 async function main() {
+  // DIAGNOSTIC: confirm project access and find active sprints
+  const diagnostic = await jiraSearch(`project = DFTP ORDER BY created DESC`, 'summary,status,issuetype', 5);
+  console.log(`DIAGNOSTIC — DFTP project access: ${diagnostic.total} total issues found`);
+  if (diagnostic.issues.length > 0) {
+    console.log(`Sample issue: ${diagnostic.issues[0].key} | ${diagnostic.issues[0].fields.issuetype?.name} | ${diagnostic.issues[0].fields.status?.name}`);
+  }
+
+  // Find active sprints
+  const sprintCheck = await jiraSearch(`project = DFTP AND sprint in openSprints()`, 'summary', 1);
+  console.log(`DIAGNOSTIC — openSprints() result: ${sprintCheck.total} issues`);
+
+  // Try by sprint name pattern
+  const sprintByName = await jiraSearch(`project = DFTP AND sprint = "S7"`, 'summary', 1);
+  console.log(`DIAGNOSTIC — sprint = "S7" result: ${sprintByName.total} issues`);
+
   // 1. Current sprint issues — openSprints() catches the active sprint regardless of ID
   const sprint = await jiraSearch(
     `project = DFTP AND sprint in openSprints() AND issuetype in (Story, Bug, Task, "Research Spike")`,
@@ -30,11 +46,17 @@ async function main() {
   // 2. Velocity: last 3 sprints (explicit IDs — openSprints() won't match historical)
   const velocity = {};
   for (const [name, id] of [['S5',5399],['S6',5400],['S7',5600]]) {
-    const done = await jiraSearch(
-      `project = DFTP AND sprint = ${id} AND status = Closed AND issuetype in (Story, Bug, Task)`,
-      'customfield_10027'
-    );
-    velocity[name] = { total: done.total, issues: done.issues.map(i => ({ key: i.key, points: i.fields.customfield_10027 || 0 })) };
+    try {
+      const done = await jiraSearch(
+        `project = DFTP AND sprint = ${id} AND status = Closed AND issuetype in (Story, Bug, Task)`,
+        'customfield_10027'
+      );
+      console.log(`Velocity ${name} (ID ${id}): ${done.total} closed issues`);
+      velocity[name] = { total: done.total, issues: done.issues.map(i => ({ key: i.key, points: i.fields.customfield_10027 || 0 })) };
+    } catch (e) {
+      console.log(`Velocity ${name} ERROR: ${e.message}`);
+      velocity[name] = { total: 0, issues: [] };
+    }
   }
 
   // 3. Blocked items
