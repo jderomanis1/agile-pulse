@@ -21,13 +21,13 @@ async function jiraSearch(jql, fields, maxResults = 100) {
 }
 
 async function main() {
-  // 1. Current sprint issues (S7 = 5600)
+  // 1. Current sprint issues — openSprints() catches the active sprint regardless of ID
   const sprint = await jiraSearch(
-    `project = DFTP AND sprint = 5600 AND issuetype in (Story, Bug, Task, "Research Spike")`,
+    `project = DFTP AND sprint in openSprints() AND issuetype in (Story, Bug, Task, "Research Spike")`,
     'summary,status,assignee,issuetype,priority,customfield_10027,labels'
   );
 
-  // 2. Velocity: last 3 sprints (S5=5399, S6=5400, S7=5600)
+  // 2. Velocity: last 3 sprints (explicit IDs — openSprints() won't match historical)
   const velocity = {};
   for (const [name, id] of [['S5',5399],['S6',5400],['S7',5600]]) {
     const done = await jiraSearch(
@@ -39,14 +39,14 @@ async function main() {
 
   // 3. Blocked items
   const blocked = await jiraSearch(
-    `project = DFTP AND sprint = 5600 AND labels = blocked`,
+    `project = DFTP AND sprint in openSprints() AND labels = blocked`,
     'summary,assignee,status',
     20
   );
 
   // 4. Q2 Epics health
   const epics = await jiraSearch(
-    `project = DFTP AND issuetype = Epic AND sprint = 5600`,
+    `project = DFTP AND issuetype = Epic AND sprint in openSprints()`,
     'summary,status,assignee,customfield_10027',
     20
   );
@@ -84,6 +84,9 @@ async function main() {
   const fs = await import('fs');
   fs.writeFileSync('public/jira-snapshot.json', JSON.stringify(snapshot, null, 2));
   console.log(`✅ Snapshot written: ${snapshot.issues.length} issues, generated at ${snapshot.generatedAt}`);
+  console.log(`Sprint issues: ${snapshot.issues.length}`);
+  console.log(`Velocity S5: ${snapshot.velocity.S5?.total}, S6: ${snapshot.velocity.S6?.total}, S7: ${snapshot.velocity.S7?.total}`);
+  console.log(`Blocked: ${snapshot.blocked.length}, Epics: ${snapshot.epics.length}`);
 }
 
 main().catch(e => { console.error(e); process.exit(1); });

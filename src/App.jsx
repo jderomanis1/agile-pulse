@@ -13,6 +13,35 @@ const CHIPS = [
   "🎯 What's due this week",
 ]
 
+function MiniChipButton({ label, onClick }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <button
+      className="chip-btn"
+      onClick={() => onClick(label)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      aria-label={`Ask: ${label}`}
+      style={{
+        padding: '4px 10px',
+        borderRadius: '9999px',
+        border: `1px solid ${COLORS.primary}`,
+        background: hovered ? COLORS.primary : 'transparent',
+        color: hovered ? COLORS.bg : COLORS.primary,
+        fontFamily: "'DM Sans', sans-serif",
+        fontSize: '11px',
+        fontWeight: 500,
+        cursor: 'pointer',
+        transition: 'background 0.15s, color 0.15s',
+        whiteSpace: 'nowrap',
+        flexShrink: 0,
+      }}
+    >
+      {label}
+    </button>
+  )
+}
+
 function ChipButton({ label, onClick }) {
   const [hovered, setHovered] = useState(false)
   return (
@@ -203,7 +232,7 @@ export default function App() {
           flexDirection: 'column',
           alignItems: 'center',
           paddingTop: '104px',
-          paddingBottom: '185px',
+          paddingBottom: '245px',
         }}
       >
         <div style={{ width: '100%', maxWidth: '760px' }}>
@@ -340,6 +369,30 @@ export default function App() {
         }}
       >
         <div style={{ maxWidth: '760px', margin: '0 auto' }}>
+          {/* ── Persistent quick questions (conversation mode only) ── */}
+          {history.length > 0 && (
+            <div style={{ marginBottom: '10px' }}>
+              <p style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: '10px',
+                color: COLORS.textMuted,
+                letterSpacing: '0.08em',
+                margin: '0 0 6px',
+              }}>QUICK QUESTIONS</p>
+              <div style={{
+                display: 'flex',
+                gap: '6px',
+                overflowX: 'auto',
+                paddingBottom: '2px',
+                scrollbarWidth: 'none',
+              }}>
+                {CHIPS.map(chip => (
+                  <MiniChipButton key={chip} label={chip} onClick={handleChipClick} />
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Visually hidden label for screen readers */}
           <label htmlFor="ask-input" className="sr-only">
             Ask anything about BIR team
