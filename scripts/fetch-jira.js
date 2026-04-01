@@ -13,13 +13,13 @@ async function jiraGet(path) {
 
 async function main() {
   // 1. Current sprint issues (S7 = 5600)
-  const sprintJql = `project = DFTP AND sprint = 5600 AND issuetype not in (Sub-task, "Sub-bug")`;
+  const sprintJql = `project = DFTP AND sprint = 5600 AND issuetype in (Story, Bug, Task, "Research Spike")`;
   const sprint = await jiraGet(`/search?jql=${encodeURIComponent(sprintJql)}&fields=summary,status,assignee,issuetype,priority,customfield_10027,labels&maxResults=100`);
 
   // 2. Velocity: last 3 sprints (S5=5399, S6=5400, S7=5600)
   const velocity = {};
   for (const [name, id] of [['S5',5399],['S6',5400],['S7',5600]]) {
-    const doneJql = `project = DFTP AND sprint = ${id} AND status = Closed AND issuetype in (Story, Bug, "Research Spike")`;
+    const doneJql = `project = DFTP AND sprint = ${id} AND status = Closed AND issuetype in (Story, Bug, Task)`;
     const done = await jiraGet(`/search?jql=${encodeURIComponent(doneJql)}&fields=customfield_10027&maxResults=100`);
     velocity[name] = { total: done.total, issues: done.issues.map(i => ({ key: i.key, points: i.fields.customfield_10027 || 0 })) };
   }
