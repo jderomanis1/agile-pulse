@@ -1,1 +1,254 @@
-{"generatedAt":"pending","sprintId":35,"sprintName":"Sprint 1 Q2 2026","sprintDates":"Mar 24 – Apr 8, 2026","issues":[],"velocity":{},"blocked":[],"epics":[]}
+{
+  "generatedAt": "2026-04-01T20:41:43.721Z",
+  "sprintId": 35,
+  "sprintName": "Sprint 1 Q2 2026",
+  "sprintDates": "Mar 24 – Apr 8, 2026",
+  "issues": [
+    {
+      "key": "FDP-40",
+      "summary": "Execute regression test suite for migrated SSRS reports",
+      "status": "To Do",
+      "statusCategory": "new",
+      "assignee": "luis",
+      "type": "Story",
+      "points": 3,
+      "labels": [
+        "QA_Only"
+      ]
+    },
+    {
+      "key": "FDP-28",
+      "summary": "Create employee master dimension with SCD Type 2 history",
+      "status": "To Do",
+      "statusCategory": "new",
+      "assignee": "sarah",
+      "type": "Story",
+      "points": 5,
+      "labels": [
+        "DataPipeline"
+      ]
+    },
+    {
+      "key": "FDP-27",
+      "summary": "PROD: Patch permissions issue on shared Power BI workspace",
+      "status": "Done",
+      "statusCategory": "done",
+      "assignee": "mary",
+      "type": "Bug",
+      "points": 0,
+      "labels": [
+        "PROD_SUPPORT"
+      ]
+    },
+    {
+      "key": "FDP-26",
+      "summary": "PROD: Investigate missing records in nightly finance ETL",
+      "status": "In Progress",
+      "statusCategory": "indeterminate",
+      "assignee": "mary",
+      "type": "Bug",
+      "points": 0,
+      "labels": [
+        "PROD_SUPPORT"
+      ]
+    },
+    {
+      "key": "FDP-25",
+      "summary": "PROD: Fix data freshness alert for morning enrollment report",
+      "status": "In Progress",
+      "statusCategory": "indeterminate",
+      "assignee": "henry",
+      "type": "Bug",
+      "points": 0,
+      "labels": [
+        "PROD_SUPPORT"
+      ]
+    },
+    {
+      "key": "FDP-24",
+      "summary": "Fix broken UDF serialization after Spark version bump",
+      "status": "To Do",
+      "statusCategory": "new",
+      "assignee": "babyjazz",
+      "type": "Bug",
+      "points": 0,
+      "labels": [
+        "Databricks"
+      ]
+    },
+    {
+      "key": "FDP-22",
+      "summary": "Upgrade Spark job configs from 2.x to 3.4 compatible syntax",
+      "status": "In Progress",
+      "statusCategory": "indeterminate",
+      "assignee": "marley",
+      "type": "Story",
+      "points": 5,
+      "labels": [
+        "DataPipeline",
+        "Databricks"
+      ]
+    },
+    {
+      "key": "FDP-20",
+      "summary": "Rebuild P&L report with new chart of accounts mapping",
+      "status": "In Progress",
+      "statusCategory": "indeterminate",
+      "assignee": "luis",
+      "type": "Story",
+      "points": 8,
+      "labels": [
+        "analytics"
+      ]
+    },
+    {
+      "key": "FDP-19",
+      "summary": "Fix timezone handling in attendance feed pipeline",
+      "status": "To Do",
+      "statusCategory": "new",
+      "assignee": "sarah",
+      "type": "Bug",
+      "points": 0,
+      "labels": [
+        "DataPipeline"
+      ]
+    },
+    {
+      "key": "FDP-18",
+      "summary": "Build compensation data validation framework",
+      "status": "Done",
+      "statusCategory": "done",
+      "assignee": "marley",
+      "type": "Story",
+      "points": 3,
+      "labels": [
+        "DataPipeline"
+      ]
+    },
+    {
+      "key": "FDP-17",
+      "summary": "Develop real-time org hierarchy sync from HRIS to data lake",
+      "status": "In Progress",
+      "statusCategory": "indeterminate",
+      "assignee": "Joe DeRomanis",
+      "type": "Story",
+      "points": 5,
+      "labels": [
+        "DataPipeline"
+      ]
+    },
+    {
+      "key": "FDP-16",
+      "summary": "Fix data type mismatch in payroll fact table migration",
+      "status": "Done",
+      "statusCategory": "done",
+      "assignee": "mary",
+      "type": "Bug",
+      "points": 0,
+      "labels": [
+        "warehouse"
+      ]
+    },
+    {
+      "key": "FDP-15",
+      "summary": "Reconcile row counts between legacy Teradata and new lakehouse",
+      "status": "Done",
+      "statusCategory": "done",
+      "assignee": "mike",
+      "type": "Story",
+      "points": 3,
+      "labels": [
+        "warehouse"
+      ]
+    },
+    {
+      "key": "FDP-13",
+      "summary": "Build incremental load pipeline for HR census dimension table",
+      "status": "In Progress",
+      "statusCategory": "indeterminate",
+      "assignee": "john",
+      "type": "Story",
+      "points": 8,
+      "labels": [
+        "DataPipeline",
+        "warehouse"
+      ]
+    },
+    {
+      "key": "FDP-12",
+      "summary": "Spike: Evaluate Power BI embedded vs published approach",
+      "status": "Done",
+      "statusCategory": "done",
+      "assignee": "Joe DeRomanis",
+      "type": "Story",
+      "points": 2,
+      "labels": [
+        "analytics"
+      ]
+    },
+    {
+      "key": "FDP-11",
+      "summary": "Fix filter cascade bug in regional comparison view",
+      "status": "To Do",
+      "statusCategory": "new",
+      "assignee": "mike",
+      "type": "Bug",
+      "points": 0,
+      "labels": [
+        "analytics"
+      ]
+    },
+    {
+      "key": "FDP-10",
+      "summary": "Create data refresh schedule for real-time occupancy dashboard",
+      "status": "To Do",
+      "statusCategory": "new",
+      "assignee": "babyjazz",
+      "type": "Story",
+      "points": 3,
+      "labels": [
+        "analytics"
+      ]
+    },
+    {
+      "key": "FDP-9",
+      "summary": "Design drill-through navigation for enrollment trends report",
+      "status": "Done",
+      "statusCategory": "done",
+      "assignee": "john",
+      "type": "Story",
+      "points": 3,
+      "labels": [
+        "analytics"
+      ]
+    },
+    {
+      "key": "FDP-8",
+      "summary": "Migrate Executive KPI Dashboard from SSRS to Power BI",
+      "status": "In Progress",
+      "statusCategory": "indeterminate",
+      "assignee": "marley",
+      "type": "Story",
+      "points": 5,
+      "labels": [
+        "analytics"
+      ]
+    }
+  ],
+  "velocity": {
+    "Sprint 3 Q2 2026": {
+      "total": 0,
+      "issues": []
+    },
+    "Sprint 4 Q2 2026": {
+      "total": 0,
+      "issues": []
+    },
+    "Sprint 5 Q2 2026": {
+      "total": 0,
+      "issues": []
+    }
+  },
+  "blocked": [],
+  "epics": []
+}
