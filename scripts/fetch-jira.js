@@ -20,33 +20,28 @@ async function jiraSearch(jql, fields, maxResults = 100) {
   }
   const data = await res.json();
   console.log(`Response keys: ${Object.keys(data).join(', ')}`);
-  // Normalize: new API uses "issues" but some endpoints use "values"
-  if (data.values && !data.issues) {
-    data.issues = data.values;
-  }
-  if (data.issues === undefined) {
-    console.log(`WARNING: no issues/values key found. Full response: ${JSON.stringify(data).substring(0, 300)}`);
-    data.issues = [];
-    data.total = 0;
-  }
+  if (!data.issues) data.issues = [];
+  data.total = data.issues.length;  // derive total from array length — new API has no total field
+  console.log(`Issues returned: ${data.issues.length}, isLast: ${data.isLast}`);
   return data;
 }
 
 async function main() {
   // DIAGNOSTIC: confirm project access and find active sprints
   const diagnostic = await jiraSearch(`project = DFTP ORDER BY created DESC`, 'summary,status,issuetype', 5);
-  console.log(`DIAGNOSTIC — DFTP project access: ${diagnostic.total} total issues found`);
+  console.log(`DIAGNOSTIC — DFTP project access: ${diagnostic.issues.length} issues returned`);
   if (diagnostic.issues.length > 0) {
-    console.log(`Sample issue: ${diagnostic.issues[0].key} | ${diagnostic.issues[0].fields.issuetype?.name} | ${diagnostic.issues[0].fields.status?.name}`);
+    const s = diagnostic.issues[0];
+    console.log(`Sample: ${s.key} | ${s.fields?.issuetype?.name} | ${s.fields?.status?.name}`);
   }
 
   // Find active sprints
   const sprintCheck = await jiraSearch(`project = DFTP AND sprint in openSprints()`, 'summary', 1);
-  console.log(`DIAGNOSTIC — openSprints() result: ${sprintCheck.total} issues`);
+  console.log(`DIAGNOSTIC — openSprints() result: ${sprintCheck.issues.length} issues`);
 
   // Try by sprint name pattern
   const sprintByName = await jiraSearch(`project = DFTP AND sprint = "S7"`, 'summary', 1);
-  console.log(`DIAGNOSTIC — sprint = "S7" result: ${sprintByName.total} issues`);
+  console.log(`DIAGNOSTIC — sprint = "S7" result: ${sprintByName.issues.length} issues`);
 
   // 1. Current sprint issues — openSprints() catches the active sprint regardless of ID
   const sprint = await jiraSearch(
@@ -62,8 +57,8 @@ async function main() {
         `project = DFTP AND sprint = ${id} AND status = Closed AND issuetype in (Story, Bug, Task)`,
         'customfield_10027'
       );
-      console.log(`Velocity ${name} (ID ${id}): ${done.total} closed issues`);
-      velocity[name] = { total: done.total, issues: done.issues.map(i => ({ key: i.key, points: i.fields.customfield_10027 || 0 })) };
+      console.log(`Velocity ${name} (ID ${id}): ${done.issues.length} closed issues`);
+      velocity[name] = { total: done.issues.length, issues: done.issues.map(i => ({ key: i.key, points: i.fields.customfield_10027 || 0 })) };
     } catch (e) {
       console.log(`Velocity ${name} ERROR: ${e.message}`);
       velocity[name] = { total: 0, issues: [] };
