@@ -93,7 +93,7 @@ export default function App() {
   useEffect(() => {
     document.title = loading
       ? 'Agile Pulse | Thinking...'
-      : 'Agile Pulse | BIR Intelligence'
+      : 'Agile Pulse | FDP Intelligence'
   }, [loading])
 
   // Auto-scroll to bottom on new answers
@@ -179,7 +179,7 @@ export default function App() {
             padding: '3px 10px',
             letterSpacing: '0.06em',
             flexShrink: 0,
-          }}>BIR Intelligence</span>
+          }}>FDP Intelligence</span>
         </div>
 
         {/* ── Snapshot status bar ── */}
@@ -285,7 +285,7 @@ export default function App() {
                 margin: '20px 0 36px',
                 letterSpacing: '0.02em',
               }}>
-                Powered by live Jira data · KinderCare DFTP/BIR
+                Powered by live Jira data · BrightPath FDP
               </p>
 
               {/* Responsive chip grid */}
@@ -346,7 +346,7 @@ export default function App() {
               margin: 0,
               letterSpacing: '0.04em',
             }}>
-              Agile Pulse · KinderCare DFTP/BIR · Powered by Claude
+              Agile Pulse · BrightPath FDP · Powered by Claude
             </p>
           </footer>
 
@@ -395,7 +395,7 @@ export default function App() {
 
           {/* Visually hidden label for screen readers */}
           <label htmlFor="ask-input" className="sr-only">
-            Ask anything about BIR team
+            Ask anything about FDP team
           </label>
 
           <div className="input-row">
@@ -406,7 +406,7 @@ export default function App() {
               value={question}
               onChange={e => setQuestion(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask anything about BIR..."
+              placeholder="Ask anything about FDP..."
               aria-label="Question input"
               aria-describedby="input-hint"
               disabled={loading}

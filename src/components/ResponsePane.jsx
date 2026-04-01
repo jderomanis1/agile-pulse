@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react'
 import COLORS from '../design-system'
 
-// ── Inline parser: **bold**, *italic*, DFTP-\d+ ──────────────────────────────
+// ── Inline parser: **bold**, *italic*, FDP-\d+ ───────────────────────────────
 function parseInline(text) {
   const segments = []
-  const regex = /(\*\*[^*]+\*\*|\*[^*]+\*|DFTP-\d+)/g
+  const regex = /(\*\*[^*]+\*\*|\*[^*]+\*|FDP-\d+)/g
   let last = 0
   let m
   while ((m = regex.exec(text)) !== null) {

@@ -1,4 +1,4 @@
-const JIRA_BASE = 'https://kindercare.atlassian.net/rest/api/3';
+const JIRA_BASE = 'https://brightpatheducation.atlassian.net/rest/api/3';
 const EMAIL = process.env.JIRA_EMAIL;
 const TOKEN = process.env.JIRA_API_TOKEN;
 const auth = Buffer.from(`${EMAIL}:${TOKEN}`).toString('base64');
@@ -46,37 +46,37 @@ async function main() {
   }
 
   // DIAGNOSTIC: confirm project access and find active sprints
-  const diagnostic = await jiraSearch(`project = DFTP ORDER BY created DESC`, 'summary,status,issuetype', 5);
-  console.log(`DIAGNOSTIC — DFTP project access: ${diagnostic.issues.length} issues returned`);
+  const diagnostic = await jiraSearch(`project = FDP ORDER BY created DESC`, 'summary,status,issuetype', 5);
+  console.log(`DIAGNOSTIC — FDP project access: ${diagnostic.issues.length} issues returned`);
   if (diagnostic.issues.length > 0) {
     const s = diagnostic.issues[0];
     console.log(`Sample: ${s.key} | ${s.fields?.issuetype?.name} | ${s.fields?.status?.name}`);
   }
 
   // Find active sprints
-  const sprintCheck = await jiraSearch(`project = DFTP AND sprint in openSprints()`, 'summary', 1);
+  const sprintCheck = await jiraSearch(`project = FDP AND sprint in openSprints()`, 'summary', 1);
   console.log(`DIAGNOSTIC — openSprints() result: ${sprintCheck.issues.length} issues`);
 
   // Try by sprint name pattern
-  const sprintByName = await jiraSearch(`project = DFTP AND sprint = "S7"`, 'summary', 1);
-  console.log(`DIAGNOSTIC — sprint = "S7" result: ${sprintByName.issues.length} issues`);
+  const sprintByName = await jiraSearch(`project = FDP AND sprint = "Sprint 1 Q2 2026"`, 'summary', 1);
+  console.log(`DIAGNOSTIC — sprint = "Sprint 1 Q2 2026" result: ${sprintByName.issues.length} issues`);
 
   // 1. Current sprint issues — openSprints() catches the active sprint regardless of ID
   const sprint = await jiraSearch(
-    `project = DFTP AND sprint in openSprints() AND issuetype in (Story, Bug, Task, "Research Spike")`,
-    'summary,status,assignee,issuetype,priority,customfield_10027,labels'
+    `project = FDP AND sprint in openSprints() AND issuetype in (Story, Bug, Task)`,
+    'summary,status,assignee,issuetype,priority,customfield_10038,labels'
   );
 
   // 2. Velocity: last 3 sprints (explicit IDs — openSprints() won't match historical)
   const velocity = {};
-  for (const [name, id] of [['S5',5399],['S6',5400],['S7',5600]]) {
+  for (const [name, id] of [['Sprint 3 Q2 2026', 68], ['Sprint 4 Q2 2026', 69], ['Sprint 5 Q2 2026', 70]]) {
     try {
       const done = await jiraSearch(
-        `project = DFTP AND sprint = ${id} AND status = Closed AND issuetype in (Story, Bug, Task)`,
-        'customfield_10027'
+        `project = FDP AND sprint = ${id} AND statusCategory = Done AND issuetype in (Story, Bug)`,
+        'customfield_10038'
       );
-      console.log(`Velocity ${name} (ID ${id}): ${done.issues.length} closed issues`);
-      velocity[name] = { total: done.issues.length, issues: done.issues.map(i => ({ key: i.key, points: i.fields.customfield_10027 || 0 })) };
+      console.log(`Velocity ${name} (ID ${id}): ${done.issues.length} done issues`);
+      velocity[name] = { total: done.issues.length, issues: done.issues.map(i => ({ key: i.key, points: i.fields.customfield_10038 || 0 })) };
     } catch (e) {
       console.log(`Velocity ${name} ERROR: ${e.message}`);
       velocity[name] = { total: 0, issues: [] };
@@ -85,22 +85,22 @@ async function main() {
 
   // 3. Blocked items
   const blocked = await jiraSearch(
-    `project = DFTP AND sprint in openSprints() AND labels = blocked`,
+    `project = FDP AND sprint in openSprints() AND labels = blocked`,
     'summary,assignee,status',
     20
   );
 
-  // 4. Q2 Epics health
+  // 4. Epics health
   const epics = await jiraSearch(
-    `project = DFTP AND issuetype = Epic AND sprint in openSprints()`,
-    'summary,status,assignee,customfield_10027',
+    `project = FDP AND issuetype = Epic AND sprint in openSprints()`,
+    'summary,status,assignee,customfield_10038',
     20
   );
 
   const snapshot = {
     generatedAt: new Date().toISOString(),
-    sprintId: 5600,
-    sprintName: 'S7',
+    sprintId: 35,
+    sprintName: 'Sprint 1 Q2 2026',
     sprintDates: 'Mar 24 – Apr 8, 2026',
     issues: sprint.issues.map(i => ({
       key: i.key,
@@ -109,7 +109,7 @@ async function main() {
       statusCategory: i.fields.status.statusCategory.key,
       assignee: i.fields.assignee?.displayName || 'Unassigned',
       type: i.fields.issuetype.name,
-      points: i.fields.customfield_10027 || 0,
+      points: i.fields.customfield_10038 || 0,
       labels: i.fields.labels || []
     })),
     velocity,
@@ -131,7 +131,7 @@ async function main() {
   fs.writeFileSync('public/jira-snapshot.json', JSON.stringify(snapshot, null, 2));
   console.log(`✅ Snapshot written: ${snapshot.issues.length} issues, generated at ${snapshot.generatedAt}`);
   console.log(`Sprint issues: ${snapshot.issues.length}`);
-  console.log(`Velocity S5: ${snapshot.velocity.S5?.total}, S6: ${snapshot.velocity.S6?.total}, S7: ${snapshot.velocity.S7?.total}`);
+  console.log(`Velocity Sprint 3: ${snapshot.velocity['Sprint 3 Q2 2026']?.total}, Sprint 4: ${snapshot.velocity['Sprint 4 Q2 2026']?.total}, Sprint 5: ${snapshot.velocity['Sprint 5 Q2 2026']?.total}`);
   console.log(`Blocked: ${snapshot.blocked.length}, Epics: ${snapshot.epics.length}`);
 }
 
