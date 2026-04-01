@@ -18,7 +18,18 @@ async function jiraSearch(jql, fields, maxResults = 100) {
     const body = await res.text();
     throw new Error(`Jira API error ${res.status}: ${body}`);
   }
-  return res.json();
+  const data = await res.json();
+  console.log(`Response keys: ${Object.keys(data).join(', ')}`);
+  // Normalize: new API uses "issues" but some endpoints use "values"
+  if (data.values && !data.issues) {
+    data.issues = data.values;
+  }
+  if (data.issues === undefined) {
+    console.log(`WARNING: no issues/values key found. Full response: ${JSON.stringify(data).substring(0, 300)}`);
+    data.issues = [];
+    data.total = 0;
+  }
+  return data;
 }
 
 async function main() {
