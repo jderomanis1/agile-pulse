@@ -7,7 +7,41 @@
     <title>Agile Pulse | BIR Intelligence</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: #080C10;
+        color: #E8F1F8;
+        font-family: 'DM Sans', system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: #080C10; }
+      ::-webkit-scrollbar-thumb { background: #1E3048; border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: #00D4B4; }
+
+      /* Animations */
+      @keyframes pulseWidth {
+        0%, 100% { width: 40%; opacity: 0.6; }
+        50% { width: 70%; opacity: 1; }
+      }
+
+      @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+      }
+
+      /* Textarea placeholder */
+      textarea::placeholder { color: #6B8FA8; }
+      textarea:focus { outline: none; }
+    </style>
   </head>
   <body>
     <div id="root"></div>
