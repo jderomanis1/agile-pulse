@@ -27,6 +27,24 @@ async function jiraSearch(jql, fields, maxResults = 100) {
 }
 
 async function main() {
+  // AUTH CHECK
+  const meRes = await fetch(`${JIRA_BASE}/myself`, {
+    headers: {
+      'Authorization': `Basic ${auth}`,
+      'Accept': 'application/json'
+    }
+  });
+  const meData = await meRes.json();
+  console.log(`AUTH CHECK → status: ${meRes.status}`);
+  console.log(`AUTH CHECK → accountId: ${meData.accountId || 'MISSING'}`);
+  console.log(`AUTH CHECK → email: ${meData.emailAddress || 'MISSING'}`);
+  console.log(`AUTH CHECK → displayName: ${meData.displayName || 'MISSING'}`);
+  console.log(`AUTH CHECK → active: ${meData.active}`);
+  if (!meData.accountId) {
+    console.log(`AUTH FAILED — full response: ${JSON.stringify(meData).substring(0, 300)}`);
+    process.exit(1);
+  }
+
   // DIAGNOSTIC: confirm project access and find active sprints
   const diagnostic = await jiraSearch(`project = DFTP ORDER BY created DESC`, 'summary,status,issuetype', 5);
   console.log(`DIAGNOSTIC — DFTP project access: ${diagnostic.issues.length} issues returned`);
