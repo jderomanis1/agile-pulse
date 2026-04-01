@@ -2,7 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- ⚡ emoji favicon via inline SVG data URL -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Agile Pulse | BIR Intelligence</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -11,7 +12,13 @@
     <style>
       *, *::before, *::after { box-sizing: border-box; }
 
-      html, body {
+      html {
+        margin: 0;
+        padding: 0;
+        background: #080C10;
+      }
+
+      body {
         margin: 0;
         padding: 0;
         background: #080C10;
@@ -19,38 +26,150 @@
         font-family: 'DM Sans', system-ui, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        /* NOTE: intentionally no overflow-x:hidden or overscroll-behavior — causes Chrome mobile scroll bugs */
       }
 
-      /* Custom scrollbar */
+      /* ── Custom scrollbar ── */
       ::-webkit-scrollbar { width: 6px; height: 6px; }
       ::-webkit-scrollbar-track { background: #080C10; }
       ::-webkit-scrollbar-thumb { background: #1E3048; border-radius: 3px; }
       ::-webkit-scrollbar-thumb:hover { background: #00D4B4; }
 
-      /* Animations */
+      /* ── Animations ── */
       @keyframes pulseWidth {
         0%, 100% { width: 40%; opacity: 0.6; }
-        50% { width: 70%; opacity: 1; }
+        50%       { width: 70%; opacity: 1;   }
       }
-
       @keyframes blink {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.3; }
+        0%, 100% { opacity: 1;   }
+        50%       { opacity: 0.3; }
       }
-
       @keyframes fadeSlideUp {
         from { opacity: 0; transform: translateY(10px); }
-        to   { opacity: 1; transform: translateY(0); }
+        to   { opacity: 1; transform: translateY(0);    }
       }
-
       @keyframes shimmer {
         0%, 100% { opacity: 0.3; }
         50%       { opacity: 0.7; }
       }
+      @keyframes chipPulse {
+        0%   { transform: scale(1);    }
+        45%  { transform: scale(1.05); }
+        100% { transform: scale(1);    }
+      }
 
-      /* Textarea placeholder */
+      /* ── Textarea baseline ── */
       textarea::placeholder { color: #6B8FA8; }
-      textarea:focus { outline: none; }
+      textarea { outline: none; }
+
+      /* ── Ask input — focus glow ── */
+      .ask-input:focus {
+        border-color: #00D4B4 !important;
+        box-shadow: 0 0 0 3px rgba(0, 212, 180, 0.14), 0 0 14px rgba(0, 212, 180, 0.08);
+      }
+
+      /* ── Keyboard focus rings (only on keyboard nav, not mouse clicks) ── */
+      button:focus-visible {
+        outline: 2px solid #00D4B4;
+        outline-offset: 2px;
+      }
+      textarea:focus-visible {
+        outline: none; /* box-shadow on .ask-input handles this */
+      }
+
+      /* ── Chip button hover pulse ── */
+      .chip-btn:hover {
+        animation: chipPulse 0.35s ease;
+      }
+
+      /* ── Chip grid: 2-col mobile → 3-col tablet → 6-col desktop ── */
+      .chip-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        width: 100%;
+        max-width: 680px;
+      }
+      @media (min-width: 640px) {
+        .chip-grid { grid-template-columns: repeat(3, 1fr); }
+      }
+      @media (min-width: 1024px) {
+        .chip-grid { grid-template-columns: repeat(6, 1fr); }
+      }
+
+      /* ── Site header: side-by-side on desktop, stacked on mobile ── */
+      .site-header {
+        padding: 14px 32px;
+      }
+      .site-header-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      @media (max-width: 639px) {
+        .site-header { padding: 10px 16px; }
+        .site-header-inner {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 4px;
+        }
+      }
+
+      /* ── Input bar: inline on desktop, stacked on mobile ── */
+      .input-row {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+      }
+      @media (max-width: 639px) {
+        .input-row {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 8px;
+        }
+      }
+
+      /* ── Submit button: fixed width desktop, full width mobile ── */
+      .submit-btn {
+        flex-shrink: 0;
+      }
+      @media (max-width: 639px) {
+        .submit-btn { width: 100%; }
+      }
+
+      /* ── ResponsePane: tighter padding on mobile ── */
+      .response-pane {
+        padding: 20px 24px;
+      }
+      @media (max-width: 639px) {
+        .response-pane { padding: 16px; }
+      }
+
+      /* ── Main content padding: narrower on mobile ── */
+      .main-content {
+        padding-left: 24px;
+        padding-right: 24px;
+      }
+      @media (max-width: 639px) {
+        .main-content {
+          padding-left: 12px;
+          padding-right: 12px;
+        }
+      }
+
+      /* ── Visually hidden (accessible label helper) ── */
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0,0,0,0);
+        white-space: nowrap;
+        border: 0;
+      }
     </style>
   </head>
   <body>

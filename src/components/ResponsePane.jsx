@@ -230,11 +230,11 @@ export default function ResponsePane({ answer, question, loading }) {
   return (
     <div
       ref={ref}
+      className="response-pane"
       style={{
         background: COLORS.surface,
         border: `1px solid ${COLORS.border}`,
         borderRadius: '12px',
-        padding: '20px 24px',
         marginBottom: '20px',
         animation: 'fadeSlideUp 0.3s ease forwards',
       }}

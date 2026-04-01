@@ -17,21 +17,25 @@ function ChipButton({ label, onClick }) {
   const [hovered, setHovered] = useState(false)
   return (
     <button
+      className="chip-btn"
       onClick={() => onClick(label)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      aria-label={`Ask: ${label}`}
       style={{
-        padding: '8px 16px',
+        padding: '10px 12px',
         borderRadius: '9999px',
         border: `1px solid ${COLORS.primary}`,
         background: hovered ? COLORS.primary : 'transparent',
         color: hovered ? COLORS.bg : COLORS.primary,
         fontFamily: "'DM Sans', sans-serif",
-        fontSize: '14px',
+        fontSize: '13px',
         fontWeight: 500,
         cursor: 'pointer',
         transition: 'background 0.15s, color 0.15s',
-        whiteSpace: 'nowrap',
+        width: '100%',
+        textAlign: 'center',
+        lineHeight: 1.3,
       }}
     >
       {label}
@@ -47,6 +51,14 @@ export default function App() {
   const [submitHovered, setSubmitHovered] = useState(false)
   const scrollRef = useRef(null)
 
+  // Dynamic page title
+  useEffect(() => {
+    document.title = loading
+      ? 'Agile Pulse | Thinking...'
+      : 'Agile Pulse | BIR Intelligence'
+  }, [loading])
+
+  // Auto-scroll to bottom on new answers
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
@@ -84,6 +96,7 @@ export default function App() {
   }
 
   const showHero = history.length === 0 && !loading
+  const isDisabled = !question.trim() || loading
 
   return (
     <div style={{
@@ -93,43 +106,52 @@ export default function App() {
       display: 'flex',
       flexDirection: 'column',
     }}>
+
       {/* ── Header ── */}
-      <header style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 50,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '14px 32px',
-        background: `${COLORS.bg}F0`,
-        backdropFilter: 'blur(12px)',
-        borderBottom: `1px solid ${COLORS.border}`,
-      }}>
-        <span style={{
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: '16px',
-          fontWeight: 600,
-          color: COLORS.primary,
-          letterSpacing: '0.04em',
-        }}>⚡ AGILE PULSE</span>
-        <span style={{
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: '11px',
-          fontWeight: 500,
-          color: '#fff',
-          background: COLORS.klc,
-          borderRadius: '4px',
-          padding: '3px 10px',
-          letterSpacing: '0.06em',
-        }}>BIR Intelligence</span>
+      <header
+        role="banner"
+        aria-label="Agile Pulse"
+        className="site-header"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          background: `${COLORS.bg}F0`,
+          backdropFilter: 'blur(12px)',
+          borderBottom: `1px solid ${COLORS.border}`,
+        }}
+      >
+        <div className="site-header-inner">
+          <span style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: '16px',
+            fontWeight: 600,
+            color: COLORS.primary,
+            letterSpacing: '0.04em',
+          }}>⚡ AGILE PULSE</span>
+          <span style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: '11px',
+            fontWeight: 500,
+            color: '#fff',
+            background: COLORS.klc,
+            borderRadius: '4px',
+            padding: '3px 10px',
+            letterSpacing: '0.06em',
+            flexShrink: 0,
+          }}>BIR Intelligence</span>
+        </div>
       </header>
 
       {/* ── Main scrollable area ── */}
       <main
         ref={scrollRef}
+        id="main-content"
+        role="main"
+        aria-label="Agile Pulse conversation"
+        className="main-content"
         style={{
           flex: 1,
           overflowY: 'auto',
@@ -137,25 +159,27 @@ export default function App() {
           flexDirection: 'column',
           alignItems: 'center',
           paddingTop: '80px',
-          paddingBottom: '140px',
-          paddingLeft: '24px',
-          paddingRight: '24px',
+          paddingBottom: '185px',
         }}
       >
         <div style={{ width: '100%', maxWidth: '760px' }}>
+
           {/* ── Hero ── */}
           {showHero && (
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center',
-              paddingTop: '80px',
-              paddingBottom: '48px',
-            }}>
+            <section
+              aria-label="Welcome"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                paddingTop: '64px',
+                paddingBottom: '48px',
+              }}
+            >
               <h1 style={{
                 fontFamily: "'DM Sans', sans-serif",
-                fontSize: 'clamp(28px, 5vw, 42px)',
+                fontSize: 'clamp(24px, 5vw, 42px)',
                 fontWeight: 700,
                 color: COLORS.text,
                 margin: '0 0 8px',
@@ -166,39 +190,44 @@ export default function App() {
               }}>
                 What would you like to know
                 <br />about the team?
-                <span style={{
-                  position: 'absolute',
-                  bottom: '-6px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: '60%',
-                  height: '2px',
-                  background: `linear-gradient(90deg, transparent, ${COLORS.primary}, transparent)`,
-                  borderRadius: '1px',
-                  animation: 'pulseWidth 3s ease-in-out infinite',
-                }} />
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    bottom: '-6px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '60%',
+                    height: '2px',
+                    background: `linear-gradient(90deg, transparent, ${COLORS.primary}, transparent)`,
+                    borderRadius: '1px',
+                    animation: 'pulseWidth 3s ease-in-out infinite',
+                  }}
+                />
               </h1>
               <p style={{
                 fontFamily: "'DM Sans', sans-serif",
                 fontSize: '14px',
                 color: COLORS.textMuted,
-                margin: '20px 0 40px',
+                margin: '20px 0 36px',
                 letterSpacing: '0.02em',
               }}>
                 Powered by live Jira data · KinderCare DFTP/BIR
               </p>
-              <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '10px',
-                justifyContent: 'center',
-                maxWidth: '680px',
-              }}>
+
+              {/* Responsive chip grid */}
+              <div
+                className="chip-grid"
+                role="list"
+                aria-label="Quick questions"
+              >
                 {CHIPS.map(chip => (
-                  <ChipButton key={chip} label={chip} onClick={handleChipClick} />
+                  <div key={chip} role="listitem">
+                    <ChipButton label={chip} onClick={handleChipClick} />
+                  </div>
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
           {/* ── Conversation history ── */}
@@ -220,84 +249,123 @@ export default function App() {
             />
           )}
 
-          {/* ── History panel (recent questions) ── */}
+          {/* ── History panel ── */}
           {history.length > 0 && !loading && (
             <HistoryPanel
               history={history}
               onRerun={q => { setQuestion(q); handleSubmit(q) }}
             />
           )}
+
+          {/* ── Footer ── */}
+          <footer
+            role="contentinfo"
+            style={{
+              textAlign: 'center',
+              paddingTop: '32px',
+              paddingBottom: '8px',
+            }}
+          >
+            <p style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: '11px',
+              color: COLORS.border,
+              margin: 0,
+              letterSpacing: '0.04em',
+            }}>
+              Agile Pulse · KinderCare DFTP/BIR · Powered by Claude
+            </p>
+          </footer>
+
         </div>
       </main>
 
       {/* ── Fixed input bar ── */}
-      <div style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: `${COLORS.bg}F5`,
-        backdropFilter: 'blur(16px)',
-        borderTop: `1px solid ${COLORS.border}`,
-        padding: '16px 24px 24px',
-      }}>
-        <div style={{
-          maxWidth: '760px',
-          margin: '0 auto',
-          display: 'flex',
-          gap: '10px',
-          alignItems: 'flex-end',
-        }}>
-          <textarea
-            rows={1}
-            value={question}
-            onChange={e => setQuestion(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Ask anything about BIR..."
-            style={{
-              flex: 1,
-              background: COLORS.surface,
-              border: `1px solid ${COLORS.border}`,
-              borderRadius: '10px',
-              padding: '12px 16px',
-              color: COLORS.text,
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: '15px',
-              resize: 'none',
-              outline: 'none',
-              lineHeight: 1.5,
-              transition: 'border-color 0.15s',
-              boxSizing: 'border-box',
-            }}
-            onFocus={e => { e.target.style.borderColor = COLORS.primary }}
-            onBlur={e => { e.target.style.borderColor = COLORS.border }}
-          />
-          <button
-            onClick={() => handleSubmit()}
-            disabled={!question.trim() || loading}
-            onMouseEnter={() => setSubmitHovered(true)}
-            onMouseLeave={() => setSubmitHovered(false)}
-            style={{
-              padding: '12px 20px',
-              borderRadius: '10px',
-              border: 'none',
-              background: (!question.trim() || loading)
-                ? COLORS.border
-                : submitHovered ? COLORS.primaryDim : COLORS.primary,
-              color: (!question.trim() || loading) ? COLORS.textMuted : COLORS.bg,
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: '15px',
-              fontWeight: 600,
-              cursor: (!question.trim() || loading) ? 'not-allowed' : 'pointer',
-              transition: 'background 0.15s, color 0.15s',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-            }}
+      <div
+        role="search"
+        aria-label="Ask a question"
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: `${COLORS.bg}F5`,
+          backdropFilter: 'blur(16px)',
+          borderTop: `1px solid ${COLORS.border}`,
+          padding: '14px 24px 20px',
+        }}
+      >
+        <div style={{ maxWidth: '760px', margin: '0 auto' }}>
+          {/* Visually hidden label for screen readers */}
+          <label htmlFor="ask-input" className="sr-only">
+            Ask anything about BIR team
+          </label>
+
+          <div className="input-row">
+            <textarea
+              id="ask-input"
+              className="ask-input"
+              rows={1}
+              value={question}
+              onChange={e => setQuestion(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask anything about BIR..."
+              aria-label="Question input"
+              aria-describedby="input-hint"
+              disabled={loading}
+              style={{
+                flex: 1,
+                background: COLORS.surface,
+                border: `1px solid ${COLORS.border}`,
+                borderRadius: '10px',
+                padding: '12px 16px',
+                color: COLORS.text,
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: '15px',
+                resize: 'none',
+                lineHeight: 1.5,
+                transition: 'border-color 0.15s, box-shadow 0.15s',
+                boxSizing: 'border-box',
+                opacity: loading ? 0.6 : 1,
+              }}
+            />
+            <button
+              className="submit-btn"
+              onClick={() => handleSubmit()}
+              disabled={isDisabled}
+              onMouseEnter={() => setSubmitHovered(true)}
+              onMouseLeave={() => setSubmitHovered(false)}
+              aria-label={loading ? 'Waiting for response' : 'Submit question to Agile Pulse'}
+              aria-busy={loading}
+              style={{
+                padding: '12px 20px',
+                borderRadius: '10px',
+                border: 'none',
+                background: isDisabled
+                  ? COLORS.border
+                  : submitHovered ? COLORS.primaryDim : COLORS.primary,
+                color: isDisabled ? COLORS.textMuted : COLORS.bg,
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: '15px',
+                fontWeight: 600,
+                cursor: isDisabled ? 'not-allowed' : 'pointer',
+                transition: 'background 0.15s, color 0.15s',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {loading ? 'Thinking…' : 'Ask Agile Pulse →'}
+            </button>
+          </div>
+
+          <p
+            id="input-hint"
+            className="sr-only"
           >
-            {loading ? 'Thinking…' : 'Ask Agile Pulse →'}
-          </button>
+            Press Enter to submit, Shift+Enter for a new line
+          </p>
         </div>
       </div>
+
     </div>
   )
 }
