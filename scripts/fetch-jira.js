@@ -13,20 +13,24 @@ async function jiraGet(path) {
 
 async function main() {
   // 1. Current sprint issues (S7 = 5600)
-  const sprint = await jiraGet('/search?jql=project%3DDFTP%20AND%20sprint%3D5600%20AND%20issuetype%20not%20in%20(Sub-task%2C%20"Sub-bug")&fields=summary,status,assignee,issuetype,priority,customfield_10027,labels&maxResults=100');
+  const sprintJql = `project = DFTP AND sprint = 5600 AND issuetype not in (Sub-task, "Sub-bug")`;
+  const sprint = await jiraGet(`/search?jql=${encodeURIComponent(sprintJql)}&fields=summary,status,assignee,issuetype,priority,customfield_10027,labels&maxResults=100`);
 
   // 2. Velocity: last 3 sprints (S5=5399, S6=5400, S7=5600)
   const velocity = {};
   for (const [name, id] of [['S5',5399],['S6',5400],['S7',5600]]) {
-    const done = await jiraGet(`/search?jql=project%3DDFTP%20AND%20sprint%3D${id}%20AND%20status%3DClosed%20AND%20issuetype%20in%20(Story%2CBug%2C"Research%20Spike")&fields=customfield_10027&maxResults=100`);
+    const doneJql = `project = DFTP AND sprint = ${id} AND status = Closed AND issuetype in (Story, Bug, "Research Spike")`;
+    const done = await jiraGet(`/search?jql=${encodeURIComponent(doneJql)}&fields=customfield_10027&maxResults=100`);
     velocity[name] = { total: done.total, issues: done.issues.map(i => ({ key: i.key, points: i.fields.customfield_10027 || 0 })) };
   }
 
   // 3. Blocked items
-  const blocked = await jiraGet('/search?jql=project%3DDFTP%20AND%20sprint%3D5600%20AND%20labels%3Dblocked&fields=summary,assignee,status&maxResults=20');
+  const blockedJql = `project = DFTP AND sprint = 5600 AND labels = blocked`;
+  const blocked = await jiraGet(`/search?jql=${encodeURIComponent(blockedJql)}&fields=summary,assignee,status&maxResults=20`);
 
   // 4. Q2 Epics health
-  const epics = await jiraGet('/search?jql=project%3DDFTP%20AND%20issuetype%3DEpic%20AND%20sprint%3D5600&fields=summary,status,assignee,customfield_10027&maxResults=20');
+  const epicsJql = `project = DFTP AND issuetype = Epic AND sprint = 5600`;
+  const epics = await jiraGet(`/search?jql=${encodeURIComponent(epicsJql)}&fields=summary,status,assignee,customfield_10027&maxResults=20`);
 
   const snapshot = {
     generatedAt: new Date().toISOString(),
