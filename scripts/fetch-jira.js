@@ -4,7 +4,7 @@ const TOKEN = process.env.JIRA_API_TOKEN;
 const auth = Buffer.from(`${EMAIL}:${TOKEN}`).toString('base64');
 
 async function jiraSearch(jql, fields, maxResults = 100) {
-  const res = await fetch(`${JIRA_BASE}/search`, {
+  const res = await fetch(`${JIRA_BASE}/search/jql`, {
     method: 'POST',
     headers: {
       'Authorization': `Basic ${auth}`,
