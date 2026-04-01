@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import COLORS from './design-system'
 import { askAgilePulse } from './api/claudeApi'
+import ResponsePane from './components/ResponsePane'
+import HistoryPanel from './components/HistoryPanel'
 
 const CHIPS = [
   '🏃 Sprint status right now',
@@ -8,7 +10,7 @@ const CHIPS = [
   '🚧 Active blockers',
   '📊 Epic health overview',
   '👥 Who owns what this sprint',
-  '🎯 What\'s due this week',
+  "🎯 What's due this week",
 ]
 
 function ChipButton({ label, onClick }) {
@@ -37,77 +39,19 @@ function ChipButton({ label, onClick }) {
   )
 }
 
-function HistoryItem({ item }) {
-  return (
-    <div style={{ marginBottom: '24px' }}>
-      <div style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '10px',
-        marginBottom: '10px',
-      }}>
-        <span style={{
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: '11px',
-          color: COLORS.primary,
-          background: `${COLORS.primary}1A`,
-          border: `1px solid ${COLORS.primary}40`,
-          borderRadius: '4px',
-          padding: '2px 8px',
-          flexShrink: 0,
-          marginTop: '2px',
-        }}>YOU</span>
-        <p style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: '15px',
-          color: COLORS.text,
-          margin: 0,
-          lineHeight: 1.5,
-        }}>{item.q}</p>
-      </div>
-      <div style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '10px',
-      }}>
-        <span style={{
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: '11px',
-          color: COLORS.klc,
-          background: `${COLORS.klc}1A`,
-          border: `1px solid ${COLORS.klc}40`,
-          borderRadius: '4px',
-          padding: '2px 8px',
-          flexShrink: 0,
-          marginTop: '2px',
-          whiteSpace: 'nowrap',
-        }}>PULSE</span>
-        <p style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: '15px',
-          color: COLORS.text,
-          margin: 0,
-          lineHeight: 1.6,
-          whiteSpace: 'pre-wrap',
-        }}>{item.a}</p>
-      </div>
-    </div>
-  )
-}
-
 export default function App() {
   const [question, setQuestion] = useState('')
-  const [answer, setAnswer] = useState('')
+  const [pendingQuestion, setPendingQuestion] = useState('')
   const [loading, setLoading] = useState(false)
   const [history, setHistory] = useState([])
   const [submitHovered, setSubmitHovered] = useState(false)
-  const answerRef = useRef(null)
+  const scrollRef = useRef(null)
 
   useEffect(() => {
-    if (history.length > 0 && answerRef.current) {
-      answerRef.current.scrollTop = answerRef.current.scrollHeight
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [history])
+  }, [history, loading])
 
   function handleChipClick(label) {
     setQuestion(label)
@@ -117,17 +61,18 @@ export default function App() {
   async function handleSubmit(overrideQuestion) {
     const q = (overrideQuestion ?? question).trim()
     if (!q || loading) return
+    setPendingQuestion(q)
     setLoading(true)
-    setAnswer('')
     setQuestion('')
     try {
       const a = await askAgilePulse(q)
-      setHistory(prev => [...prev, { q, a }])
+      setHistory(prev => [...prev, { q, a, ts: Date.now() }])
     } catch (err) {
       const a = `⚠️ Unable to reach Jira right now. Check your connection and try again.\n\n${err.message}`
-      setHistory(prev => [...prev, { q, a }])
+      setHistory(prev => [...prev, { q, a, ts: Date.now() }])
     } finally {
       setLoading(false)
+      setPendingQuestion('')
     }
   }
 
@@ -148,7 +93,7 @@ export default function App() {
       display: 'flex',
       flexDirection: 'column',
     }}>
-      {/* Header */}
+      {/* ── Header ── */}
       <header style={{
         position: 'fixed',
         top: 0,
@@ -182,121 +127,110 @@ export default function App() {
         }}>BIR Intelligence</span>
       </header>
 
-      {/* Main */}
-      <main style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        paddingTop: '80px',
-        paddingBottom: '140px',
-        paddingLeft: '24px',
-        paddingRight: '24px',
-        maxWidth: '800px',
-        margin: '0 auto',
-        width: '100%',
-        boxSizing: 'border-box',
-      }}>
-        {showHero ? (
-          <div style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textAlign: 'center',
-            paddingTop: '80px',
-            paddingBottom: '48px',
-            width: '100%',
-          }}>
-            <h1 style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 'clamp(28px, 5vw, 42px)',
-              fontWeight: 700,
-              color: COLORS.text,
-              margin: '0 0 8px',
-              lineHeight: 1.2,
-              letterSpacing: '-0.02em',
-              position: 'relative',
-              display: 'inline-block',
-            }}>
-              What would you like to know
-              <br />about the team?
-              <span style={{
-                position: 'absolute',
-                bottom: '-6px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '60%',
-                height: '2px',
-                background: `linear-gradient(90deg, transparent, ${COLORS.primary}, transparent)`,
-                borderRadius: '1px',
-                animation: 'pulseWidth 3s ease-in-out infinite',
-              }} />
-            </h1>
-            <p style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: '14px',
-              color: COLORS.textMuted,
-              margin: '20px 0 40px',
-              letterSpacing: '0.02em',
-            }}>
-              Powered by live Jira data · KinderCare DFTP/BIR
-            </p>
+      {/* ── Main scrollable area ── */}
+      <main
+        ref={scrollRef}
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          paddingTop: '80px',
+          paddingBottom: '140px',
+          paddingLeft: '24px',
+          paddingRight: '24px',
+        }}
+      >
+        <div style={{ width: '100%', maxWidth: '760px' }}>
+          {/* ── Hero ── */}
+          {showHero && (
             <div style={{
               display: 'flex',
-              flexWrap: 'wrap',
-              gap: '10px',
-              justifyContent: 'center',
-              maxWidth: '680px',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              paddingTop: '80px',
+              paddingBottom: '48px',
             }}>
-              {CHIPS.map(chip => (
-                <ChipButton key={chip} label={chip} onClick={handleChipClick} />
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div
-            ref={answerRef}
-            style={{
-              flex: 1,
-              width: '100%',
-              overflowY: 'auto',
-              paddingTop: '24px',
-              paddingBottom: '16px',
-            }}
-          >
-            {history.map((item, i) => (
-              <HistoryItem key={i} item={item} />
-            ))}
-            {loading && (
+              <h1 style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 'clamp(28px, 5vw, 42px)',
+                fontWeight: 700,
+                color: COLORS.text,
+                margin: '0 0 8px',
+                lineHeight: 1.2,
+                letterSpacing: '-0.02em',
+                position: 'relative',
+                display: 'inline-block',
+              }}>
+                What would you like to know
+                <br />about the team?
+                <span style={{
+                  position: 'absolute',
+                  bottom: '-6px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '60%',
+                  height: '2px',
+                  background: `linear-gradient(90deg, transparent, ${COLORS.primary}, transparent)`,
+                  borderRadius: '1px',
+                  animation: 'pulseWidth 3s ease-in-out infinite',
+                }} />
+              </h1>
+              <p style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: '14px',
+                color: COLORS.textMuted,
+                margin: '20px 0 40px',
+                letterSpacing: '0.02em',
+              }}>
+                Powered by live Jira data · KinderCare DFTP/BIR
+              </p>
               <div style={{
                 display: 'flex',
-                alignItems: 'center',
+                flexWrap: 'wrap',
                 gap: '10px',
+                justifyContent: 'center',
+                maxWidth: '680px',
               }}>
-                <span style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: '11px',
-                  color: COLORS.klc,
-                  background: `${COLORS.klc}1A`,
-                  border: `1px solid ${COLORS.klc}40`,
-                  borderRadius: '4px',
-                  padding: '2px 8px',
-                }}>PULSE</span>
-                <span style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: '13px',
-                  color: COLORS.textMuted,
-                  animation: 'blink 1.2s step-start infinite',
-                }}>Querying Jira...</span>
+                {CHIPS.map(chip => (
+                  <ChipButton key={chip} label={chip} onClick={handleChipClick} />
+                ))}
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+
+          {/* ── Conversation history ── */}
+          {history.map((item, i) => (
+            <ResponsePane
+              key={i}
+              question={item.q}
+              answer={item.a}
+              loading={false}
+            />
+          ))}
+
+          {/* ── In-flight loading pane ── */}
+          {loading && (
+            <ResponsePane
+              question={pendingQuestion}
+              answer=""
+              loading={true}
+            />
+          )}
+
+          {/* ── History panel (recent questions) ── */}
+          {history.length > 0 && !loading && (
+            <HistoryPanel
+              history={history}
+              onRerun={q => { setQuestion(q); handleSubmit(q) }}
+            />
+          )}
+        </div>
       </main>
 
-      {/* Input bar — fixed at bottom */}
+      {/* ── Fixed input bar ── */}
       <div style={{
         position: 'fixed',
         bottom: 0,
@@ -308,7 +242,7 @@ export default function App() {
         padding: '16px 24px 24px',
       }}>
         <div style={{
-          maxWidth: '800px',
+          maxWidth: '760px',
           margin: '0 auto',
           display: 'flex',
           gap: '10px',
@@ -339,7 +273,7 @@ export default function App() {
             onBlur={e => { e.target.style.borderColor = COLORS.border }}
           />
           <button
-            onClick={handleSubmit}
+            onClick={() => handleSubmit()}
             disabled={!question.trim() || loading}
             onMouseEnter={() => setSubmitHovered(true)}
             onMouseLeave={() => setSubmitHovered(false)}
@@ -360,18 +294,9 @@ export default function App() {
               flexShrink: 0,
             }}
           >
-            {loading ? 'Thinking...' : 'Ask Agile Pulse →'}
+            {loading ? 'Thinking…' : 'Ask Agile Pulse →'}
           </button>
         </div>
-        {history.length === 0 && !showHero && (
-          <p style={{
-            textAlign: 'center',
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: '13px',
-            color: COLORS.textMuted,
-            margin: '8px 0 0',
-          }}>Ask a question to see live Jira data</p>
-        )}
       </div>
     </div>
   )
