@@ -49,7 +49,16 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [history, setHistory] = useState([])
   const [submitHovered, setSubmitHovered] = useState(false)
+  const [snapshot, setSnapshot] = useState(null)
   const scrollRef = useRef(null)
+
+  // Load Jira snapshot on mount
+  useEffect(() => {
+    fetch(import.meta.env.BASE_URL + 'jira-snapshot.json')
+      .then(r => r.json())
+      .then(data => setSnapshot(data))
+      .catch(() => setSnapshot({ generatedAt: 'error', issues: [], velocity: {}, blocked: [], epics: [] }))
+  }, [])
 
   // Dynamic page title
   useEffect(() => {
@@ -77,7 +86,7 @@ export default function App() {
     setLoading(true)
     setQuestion('')
     try {
-      const a = await askAgilePulse(q)
+      const a = await askAgilePulse(q, snapshot)
       setHistory(prev => [...prev, { q, a, ts: Date.now() }])
     } catch (err) {
       const a = `⚠️ Unable to reach Jira right now. Check your connection and try again.\n\n${err.message}`
@@ -143,6 +152,41 @@ export default function App() {
             flexShrink: 0,
           }}>BIR Intelligence</span>
         </div>
+
+        {/* ── Snapshot status bar ── */}
+        {snapshot !== null && (() => {
+          const isPending = snapshot.generatedAt === 'pending'
+          const isError   = snapshot.generatedAt === 'error'
+          const dotColor  = isError ? COLORS.statusRed : isPending ? COLORS.statusYellow : COLORS.statusGreen
+          const label     = isError
+            ? 'Snapshot unavailable'
+            : isPending
+            ? 'Data refresh pending — trigger workflow'
+            : `Data as of ${new Date(snapshot.generatedAt).toLocaleString()}`
+          return (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              gap: '5px',
+              paddingTop: '4px',
+            }}>
+              <span aria-hidden="true" style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: dotColor,
+                flexShrink: 0,
+              }} />
+              <span style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: '10px',
+                color: COLORS.textMuted,
+                letterSpacing: '0.02em',
+              }}>{label}</span>
+            </div>
+          )
+        })()}
       </header>
 
       {/* ── Main scrollable area ── */}
@@ -158,7 +202,7 @@ export default function App() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          paddingTop: '80px',
+          paddingTop: '104px',
           paddingBottom: '185px',
         }}
       >
