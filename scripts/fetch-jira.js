@@ -3,34 +3,53 @@ const EMAIL = process.env.JIRA_EMAIL;
 const TOKEN = process.env.JIRA_API_TOKEN;
 const auth = Buffer.from(`${EMAIL}:${TOKEN}`).toString('base64');
 
-async function jiraGet(path) {
-  const res = await fetch(`${JIRA_BASE}${path}`, {
-    headers: { 'Authorization': `Basic ${auth}`, 'Accept': 'application/json' }
+async function jiraSearch(jql, fields, maxResults = 100) {
+  const res = await fetch(`${JIRA_BASE}/search`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Basic ${auth}`,
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ jql, fields: fields.split(','), maxResults })
   });
-  if (!res.ok) throw new Error(`Jira API error ${res.status}: ${path}`);
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Jira API error ${res.status}: ${body}`);
+  }
   return res.json();
 }
 
 async function main() {
   // 1. Current sprint issues (S7 = 5600)
-  const sprintJql = `project = DFTP AND sprint = 5600 AND issuetype in (Story, Bug, Task, "Research Spike")`;
-  const sprint = await jiraGet(`/search?jql=${encodeURIComponent(sprintJql)}&fields=summary,status,assignee,issuetype,priority,customfield_10027,labels&maxResults=100`);
+  const sprint = await jiraSearch(
+    `project = DFTP AND sprint = 5600 AND issuetype in (Story, Bug, Task, "Research Spike")`,
+    'summary,status,assignee,issuetype,priority,customfield_10027,labels'
+  );
 
   // 2. Velocity: last 3 sprints (S5=5399, S6=5400, S7=5600)
   const velocity = {};
   for (const [name, id] of [['S5',5399],['S6',5400],['S7',5600]]) {
-    const doneJql = `project = DFTP AND sprint = ${id} AND status = Closed AND issuetype in (Story, Bug, Task)`;
-    const done = await jiraGet(`/search?jql=${encodeURIComponent(doneJql)}&fields=customfield_10027&maxResults=100`);
+    const done = await jiraSearch(
+      `project = DFTP AND sprint = ${id} AND status = Closed AND issuetype in (Story, Bug, Task)`,
+      'customfield_10027'
+    );
     velocity[name] = { total: done.total, issues: done.issues.map(i => ({ key: i.key, points: i.fields.customfield_10027 || 0 })) };
   }
 
   // 3. Blocked items
-  const blockedJql = `project = DFTP AND sprint = 5600 AND labels = blocked`;
-  const blocked = await jiraGet(`/search?jql=${encodeURIComponent(blockedJql)}&fields=summary,assignee,status&maxResults=20`);
+  const blocked = await jiraSearch(
+    `project = DFTP AND sprint = 5600 AND labels = blocked`,
+    'summary,assignee,status',
+    20
+  );
 
   // 4. Q2 Epics health
-  const epicsJql = `project = DFTP AND issuetype = Epic AND sprint = 5600`;
-  const epics = await jiraGet(`/search?jql=${encodeURIComponent(epicsJql)}&fields=summary,status,assignee,customfield_10027&maxResults=20`);
+  const epics = await jiraSearch(
+    `project = DFTP AND issuetype = Epic AND sprint = 5600`,
+    'summary,status,assignee,customfield_10027',
+    20
+  );
 
   const snapshot = {
     generatedAt: new Date().toISOString(),
