@@ -40,6 +40,7 @@ export async function askAgilePulse(question) {
       'x-api-key': apiKey,
       'anthropic-version': '2023-06-01',
       'anthropic-beta': 'mcp-client-2025-04-04',
+      'anthropic-dangerous-direct-browser-access': 'true',
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
