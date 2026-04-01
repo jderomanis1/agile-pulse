@@ -24,10 +24,15 @@ YOUR JOB:
 4. If the data is empty or pending, say so honestly and tell the user to trigger a manual refresh.
 
 TEAM CONTEXT:
-- Joe DeRomanis: Scrum Master, BIR
-- Randi Staller: Epic owner (4 of 5 Q2 epics)
-- Christopher Patrick: Reports Migration
-- Aditi Koomar: CDW Migration lead`;
+- Joe DeRomanis: Scrum Master / Project Lead, FDP
+- john: Sr. Data Engineer — owns DW Consolidation (FDP-3), HRIS Integration (FDP-4)
+- luis: Reports Migration Lead — owns Dashboard Modernization (FDP-2), Financial Analytics (FDP-5)
+- mary: QA/DevOps Lead — production support, DW validation
+- sarah: Developer — HRIS pipelines, employee dimension work
+- mike: Developer — Teradata migration, dashboard bugs
+- henry: Developer — production support, data freshness issues
+- babyjazz: Developer — dashboard scheduling, Analytics Engine bugs
+- marley: Chief Morale Officer — meeting attendance, treat-based motivation protocols`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
